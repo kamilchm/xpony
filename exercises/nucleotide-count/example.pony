@@ -1,28 +1,22 @@
 use "collections"
 
-class Nucleotide
-  let char: U8
+primitive A fun apply(): U8 => 'A'
+primitive T fun apply(): U8 => 'T'
+primitive C fun apply(): U8 => 'C'
+primitive G fun apply(): U8 => 'G'
 
-  new _create(char': U8) =>
-    char = char'
-
-  fun hash(): U64 =>
-    char.hash()
-
-  fun eq(that: Nucleotide box): Bool =>
-    char.eq(that.char)
-
-  fun ne(that: Nucleotide box): Bool =>
-    char.ne(that.char)
-
-  fun string(): String =>
-    char.string()
+type Nucleotide is (A | T | C | G)
 
 primitive Nucleotides
-  fun a(): Nucleotide => Nucleotide._create('A')
-  fun t(): Nucleotide => Nucleotide._create('T')
-  fun c(): Nucleotide => Nucleotide._create('C')
-  fun g(): Nucleotide => Nucleotide._create('G')
+  fun fromChar(char: U8): Nucleotide ? =>
+    match char
+    | 'A' => A
+    | 'T' => T
+    | 'C' => C
+    | 'G' => G
+    else
+      error
+    end
 
 primitive NucleotideCount
   fun count(strand: String, nucleotide: Nucleotide): U32 =>
@@ -31,26 +25,26 @@ primitive NucleotideCount
     """
     var cnt: U32 = 0
     for char in strand.values() do
-      if nucleotide.char == char then
+      if nucleotide() == char then
         cnt = cnt + 1
       end
     end
     cnt
 
-  fun histogram(strand: String): Map[Nucleotide, U32] =>
+  fun histogram(strand: String): MapIs[Nucleotide, U32] =>
     """
     Returns a summary of counts by nucleotide.
     """
-    var hist = Map[Nucleotide, U32]()
-    hist(Nucleotides.a()) = 0
-    hist(Nucleotides.t()) = 0
-    hist(Nucleotides.c()) = 0
-    hist(Nucleotides.g()) = 0
+    var hist = MapIs[Nucleotide, U32]()
+    hist(A) = 0
+    hist(T) = 0
+    hist(C) = 0
+    hist(G) = 0
 
     for char in strand.values() do
-      let possible_nucleotide = Nucleotide._create(char)
       try
-        hist(possible_nucleotide) = hist(possible_nucleotide) + 1
+        let n = Nucleotides.fromChar(char)
+        hist(n) = hist(n) + 1
       end
     end
 
